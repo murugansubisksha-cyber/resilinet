@@ -21,9 +21,23 @@ function Sidebar() {
         <NavLink to="/incidents">
            ⚠️ Incidents
         </NavLink>
+
+        <NavLink to="/route-comparison">
+           🛣️ Route Comparison
+        </NavLink>
+
+        <NavLink to="/field-report">
+           📝 Field Report
+        </NavLink>
+
+        <NavLink to="/ai-insights">
+          🤖 AI Insights
+        </NavLink>
         
-        <div className="menu-item">🛣️ Route Comparison</div>
-        <div className="menu-item">📱 Field Report</div>
+        <NavLink to="/smart-alerts">
+          🔔 Smart Alerts
+        </NavLink>
+
       </nav>
     </aside>
   );
