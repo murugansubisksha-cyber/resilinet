@@ -1,24 +1,31 @@
+import { NavLink } from "react-router-dom";
+
 function Sidebar() {
   return (
-    <div
-      style={{
-        width: "220px",
-        minHeight: "100vh",
-        borderRight: "1px solid #ccc",
-        padding: "20px",
-      }}
-    >
+    <aside className="sidebar">
       <h2>🚚 ResiliNet</h2>
 
-      <hr />
+      <nav className="menu">
+        <NavLink to="/" end>
+          🏠 Dashboard
+        </NavLink>
 
-      <p>🏠 Dashboard</p>
-      <p>🗺️ Network Map</p>
-      <p>🚛 Convoys</p>
-      <p>📸 Incidents</p>
-      <p>🛣️ Route Comparison</p>
-      <p>📱 Field Report</p>
-    </div>
+        <NavLink to="/map">
+          🗺️ Network Map
+        </NavLink>
+
+        <NavLink to="/convoys">
+          🚛 Convoys
+        </NavLink>
+
+        <NavLink to="/incidents">
+           ⚠️ Incidents
+        </NavLink>
+        
+        <div className="menu-item">🛣️ Route Comparison</div>
+        <div className="menu-item">📱 Field Report</div>
+      </nav>
+    </aside>
   );
 }
 
