@@ -1,0 +1,41 @@
+{
+  "scenario_id": "ASSAM_NORMAL_001",
+  "scenario_name": "Normal Conditions - Dry Season",
+  "corridor": "Guwahati\u2013Silchar (400 km)",
+  "timestamp": "2026-09-03T18:59:53.594256",
+  "season": "Winter/Dry (Feb-Mar or Nov)",
+  "weather": {
+    "rainfall_mm": 35,
+    "temperature_c": 24,
+    "humidity_percent": 65,
+    "wind_speed_kmh": 10,
+    "condition": "Clear to partly cloudy"
+  },
+  "road_conditions": {
+    "total_roads": 12500,
+    "roads_open": 12500,
+    "roads_blocked": 0,
+    "roads_degraded": 0,
+    "status": {
+      "OPEN": 12500,
+      "DEGRADED": 0,
+      "BLOCKED": 0
+    }
+  },
+  "accessibility": {
+    "network_accessibility_percent": 88,
+    "avg_delay_multiplier": 1.0,
+    "note": "Full network operational, normal travel times"
+  },
+  "vehicles": {
+    "all_operational": true,
+    "restrictions": null
+  },
+  "risk": {
+    "overall": "LOW",
+    "landslide": "LOW",
+    "flood": "LOW"
+  },
+  "data_source": "DEMO",
+  "data_note": "SIMULATED for hackathon demo"
+}
