@@ -12,7 +12,19 @@ function FieldReport() {
   const [syncStatus, setSyncStatus] = useState("Not Saved");
 
   const timestamp = new Date().toLocaleString();
-
+  const hazardTypes = [
+  "Flood",
+  "Landslide",
+  "Blockade",
+  "Weather",
+  "Accident",
+];
+const [hazardType, setHazardType] = useState("");
+const [severity, setSeverity] = useState(1);
+const [notes, setNotes] = useState("");
+const [offlineCount, setOfflineCount] = useState(
+  JSON.parse(localStorage.getItem("offline_reports") || "[]").length
+);
   // Handle image selection
   const handleImageChange = (event) => {
     const selectedImage = event.target.files[0];
@@ -101,6 +113,40 @@ function FieldReport() {
       alert("Error saving report.");
     };
   };
+  const saveOfflineReport = (report) => {
+  const existing =
+    JSON.parse(localStorage.getItem("offline_reports")) || [];
+
+  existing.push(report);
+
+  localStorage.setItem(
+    "offline_reports",
+    JSON.stringify(existing)
+  );
+};
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  const report = {
+    id: Date.now(),
+    hazardType,
+    severity,
+    notes,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (!navigator.onLine) {
+    saveOfflineReport(report);
+
+    alert("You are offline. Report saved locally.");
+
+    return;
+  }
+
+  console.log("Sending report:", report);
+
+  alert("Report submitted successfully!");
+};
 
   return (
     <div className="page">
@@ -146,6 +192,43 @@ function FieldReport() {
             </option>
           </select>
         </div>
+        <h2>Step 2: Event Categorization</h2>
+
+<div className="hazard-types">
+  {hazardTypes.map((type) => (
+    <button
+      key={type}
+      type="button"
+      onClick={() => setHazardType(type)}
+      className={hazardType === type ? "active-hazard" : ""}
+    >
+      {type}
+    </button>
+  ))}
+</div>
+<h2>Step 3: Severity & Notes</h2>
+
+<label>Severity: {severity}</label>
+
+<div className="severity-buttons">
+  {[1, 2, 3, 4, 5].map((level) => (
+    <button
+      key={level}
+      type="button"
+      onClick={() => setSeverity(level)}
+      className={severity === level ? "active-severity" : ""}
+    >
+      {level}
+    </button>
+  ))}
+</div>
+
+<textarea
+  placeholder="Describe the incident..."
+  value={notes}
+  onChange={(e) => setNotes(e.target.value)}
+  rows="5"
+/>
 
         {/* Camera / Image */}
 
@@ -228,7 +311,7 @@ function FieldReport() {
         </div>
 
         {/* Save */}
-
+        <form onSubmit={handleSubmit}></form>
         <button
           className="submit-report-button"
           onClick={saveReport}

@@ -1,4 +1,12 @@
 import { useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 function AIInsights() {
   const [riskLevel, setRiskLevel] = useState("Medium");

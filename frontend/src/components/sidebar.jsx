@@ -1,44 +1,164 @@
-import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Map,
+  Truck,
+  AlertTriangle,
+  Route,
+  FileText,
+  Brain,
+  Bell,
+  LogOut,
+  Wifi,
+} from "lucide-react";
+
+import {
+  NavLink,
+  useNavigate,
+} from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
 
 function Sidebar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  const menuItems = [
+    {
+      name: "Dashboard",
+      path: "/",
+      icon: LayoutDashboard,
+    },
+    {
+      name: "Network Map",
+      path: "/network-map",
+      icon: Map,
+    },
+    {
+      name: "Convoys",
+      path: "/convoys",
+      icon: Truck,
+    },
+    {
+      name: "Incidents",
+      path: "/incidents",
+      icon: AlertTriangle,
+    },
+    {
+      name: "Route Comparison",
+      path: "/route-comparison",
+      icon: Route,
+    },
+    {
+      name: "Field Report",
+      path: "/field-report",
+      icon: FileText,
+    },
+    {
+      name: "AI Insights",
+      path: "/ai-insights",
+      icon: Brain,
+    },
+    {
+      name: "Smart Alerts",
+      path: "/smart-alerts",
+      icon: Bell,
+    },
+  ];
+
   return (
     <aside className="sidebar">
-      <h2>🚚 ResiliNet</h2>
 
-      <nav className="menu">
-        <NavLink to="/" end>
-          🏠 Dashboard
-        </NavLink>
+      <div className="sidebar-logo">
+        🚚 ResiliNet
+      </div>
 
-        <NavLink to="/map">
-          🗺️ Network Map
-        </NavLink>
 
-        <NavLink to="/convoys">
-          🚛 Convoys
-        </NavLink>
+      <nav>
 
-        <NavLink to="/incidents">
-           ⚠️ Incidents
-        </NavLink>
+        {menuItems.map((item) => {
+          const Icon = item.icon;
 
-        <NavLink to="/route-comparison">
-           🛣️ Route Comparison
-        </NavLink>
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `nav-item ${
+                  isActive
+                    ? "active"
+                    : ""
+                }`
+              }
+            >
 
-        <NavLink to="/field-report">
-           📝 Field Report
-        </NavLink>
+              <Icon size={20} />
 
-        <NavLink to="/ai-insights">
-          🤖 AI Insights
-        </NavLink>
-        
-        <NavLink to="/smart-alerts">
-          🔔 Smart Alerts
-        </NavLink>
+              <span>
+                {item.name}
+              </span>
+
+            </NavLink>
+          );
+        })}
 
       </nav>
+
+
+      <div className="sidebar-bottom">
+
+        <div className="server-health">
+
+          <Wifi size={16} />
+
+          <span className="health-dot"></span>
+
+          <span>
+            Backend Connected
+          </span>
+
+        </div>
+
+
+        <div className="user-card">
+
+          <div className="avatar">
+            {user?.email?.charAt(0)
+              ?.toUpperCase() || "U"}
+          </div>
+
+          <div>
+
+            <strong>
+              {user?.email || "User"}
+            </strong>
+
+            <small>
+              {user?.role}
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <button
+          className="logout-button"
+          onClick={handleLogout}
+        >
+
+          <LogOut size={18} />
+
+          Logout
+
+        </button>
+
+      </div>
+
     </aside>
   );
 }

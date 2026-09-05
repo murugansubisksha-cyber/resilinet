@@ -1,56 +1,100 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Polyline,
+} from "react-leaflet";
+
+import { useEffect, useState } from "react";
+
+import {
+  fetchRoads,
+  fetchRiskAssessment,
+} from "../api/services";
+
 
 function NetworkMap() {
-  const center = [26.2006, 92.9376];
 
-  const incidents = [
-    {
-      id: 1,
-      position: [26.25, 92.95],
-      title: "Road Obstruction",
-      description: "Possible landslide reported",
-    },
-    {
-      id: 2,
-      position: [26.15, 92.85],
-      title: "Flood Risk",
-      description: "Heavy rainfall affecting road",
-    },
-  ];
+  const [roads, setRoads] =
+    useState([]);
+
+  const getRiskColor = (risk) => {
+
+    if (risk >= 80) {
+      return "#EF4444";
+    }
+
+    if (risk >= 50) {
+      return "#F59E0B";
+    }
+
+    return "#10B981";
+  };
+
+
+  useEffect(() => {
+
+    const loadData = async () => {
+
+      try {
+
+        const roadsData =
+          await fetchRoads();
+
+        setRoads(roadsData);
+
+      } catch (error) {
+
+        console.error(
+          "Failed to load roads",
+          error
+        );
+
+      }
+
+    };
+
+    loadData();
+
+  }, []);
+
 
   return (
+
     <div>
+
       <h1>Network Map</h1>
 
-      <p className="subtitle">
-        Live accessibility and logistics monitoring
-      </p>
+      <MapContainer
+        center={[11.1271, 78.6569]}
+        zoom={7}
+        style={{
+          height: "600px",
+          width: "100%",
+        }}
+      >
 
-      <div className="map-container">
-        <MapContainer
-          center={center}
-          zoom={8}
-          style={{ height: "600px", width: "100%" }}
-        >
-          <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        />
+
+
+        {roads.map((road) => (
+
+          <Polyline
+            key={road.id}
+            positions={road.coordinates}
+            color={
+              getRiskColor(
+                road.risk_score
+              )
+            }
+            weight={5}
           />
 
-          {incidents.map((incident) => (
-            <Marker
-              key={incident.id}
-              position={incident.position}
-            >
-              <Popup>
-                <strong>{incident.title}</strong>
-                <br />
-                {incident.description}
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-      </div>
+        ))}
+
+      </MapContainer>
+
     </div>
   );
 }

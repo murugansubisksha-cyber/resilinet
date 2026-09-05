@@ -1,56 +1,89 @@
+import React from "react";
+
+const convoys = [
+  {
+    id: "CV-101",
+    route: "Guwahati → Shillong",
+    vehicle_count: 8,
+    average_speed: 42,
+    progress: 75,
+    current_risk: "Low",
+  },
+  {
+    id: "CV-102",
+    route: "Imphal → Kohima",
+    vehicle_count: 5,
+    average_speed: 35,
+    progress: 45,
+    current_risk: "Medium",
+  },
+  {
+    id: "CV-103",
+    route: "Silchar → Aizawl",
+    vehicle_count: 10,
+    average_speed: 28,
+    progress: 25,
+    current_risk: "High",
+  },
+];
+
 function Convoys() {
-  const convoys = [
-    {
-      id: "CV-001",
-      vehicle: "Truck 01",
-      destination: "Silchar",
-      status: "Moving",
-      risk: "Low",
-    },
-    {
-      id: "CV-002",
-      vehicle: "Truck 02",
-      destination: "Imphal",
-      status: "Delayed",
-      risk: "Medium",
-    },
-    {
-      id: "CV-003",
-      vehicle: "Medical Van",
-      destination: "Guwahati",
-      status: "Stopped",
-      risk: "High",
-    },
-  ];
-
   return (
-    <div>
-      <h1 className="page-title">🚛 Convoy Management</h1>
+    <div className="convoys-page">
+      <h1>🚚 Convoy Monitoring</h1>
 
-      <p className="page-subtitle">
-        Monitor vehicles and logistics movements
+      <p className="page-description">
+        Monitor active vehicles and convoy movement in real time.
       </p>
 
       <div className="convoy-grid">
         {convoys.map((convoy) => (
           <div className="convoy-card" key={convoy.id}>
-            <h2>{convoy.id}</h2>
+            
+            <h3>🚚 Convoy {convoy.id}</h3>
 
             <p>
-              <strong>Vehicle:</strong> {convoy.vehicle}
+              <strong>🛣 Route:</strong> {convoy.route}
             </p>
 
             <p>
-              <strong>Destination:</strong> {convoy.destination}
+              <strong>🚛 Vehicles:</strong> {convoy.vehicle_count}
             </p>
 
             <p>
-              <strong>Status:</strong> {convoy.status}
+              <strong>⚡ Speed:</strong> {convoy.average_speed} km/h
             </p>
 
             <p>
-              <strong>Risk Level:</strong> {convoy.risk}
+              <strong>⚠️ Current Risk:</strong>{" "}
+              <span className={`risk ${convoy.current_risk.toLowerCase()}`}>
+                {convoy.current_risk}
+              </span>
             </p>
+
+            <p>
+              <strong>📍 Journey Progress:</strong>{" "}
+              {convoy.progress}%
+            </p>
+
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${convoy.progress}%`,
+                }}
+              ></div>
+            </div>
+
+            {convoy.current_risk === "High" && (
+              <div className="reroute-alert">
+                ⚠️ High route risk detected!
+                <br />
+
+                <button>Accept Reroute</button>
+              </div>
+            )}
+
           </div>
         ))}
       </div>
