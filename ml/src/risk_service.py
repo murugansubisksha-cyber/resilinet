@@ -16,17 +16,12 @@ FEATURES = [
     "incident_count",
 ]
 
-MODEL_PATH = (
-    Path(__file__).resolve().parents[1]
-    / "models"
-    / "risk_model.pkl"
-)
+MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "risk_model.pkl"
 
 
-def get_risk_level(risk_score: float) -> str:
+def get_risk_level(risk_score):
     """
-    Convert a model risk score in the range 0-1
-    into the application's risk category.
+    Convert numerical risk score into a risk category.
     """
     if risk_score <= 0.24:
         return "LOW"
@@ -38,17 +33,15 @@ def get_risk_level(risk_score: float) -> str:
         return "CRITICAL"
 
 
-def validate_features(features: dict) -> None:
+def validate_features(features):
     """
-    Validate that all required ML features are present
-    and contain numeric values.
+    Validate the input feature dictionary.
     """
     if not isinstance(features, dict):
         raise TypeError("features must be a dictionary")
 
     missing_features = [
-        feature
-        for feature in FEATURES
+        feature for feature in FEATURES
         if feature not in features
     ]
 
@@ -58,12 +51,21 @@ def validate_features(features: dict) -> None:
         )
 
     for feature in FEATURES:
+        value = features[feature]
+
+        if value is None:
+            raise ValueError(
+                f"Feature '{feature}' cannot be None"
+            )
+
         try:
-            float(features[feature])
-        except (TypeError, ValueError) as exc:
+            float(value)
+        except (TypeError, ValueError):
             raise ValueError(
                 f"Feature '{feature}' must be numeric"
-            ) from exc
+            )
+
+    return True
 
 
 def load_model():
@@ -72,51 +74,51 @@ def load_model():
     """
     if not MODEL_PATH.exists():
         raise FileNotFoundError(
-            f"Risk model not found at: {MODEL_PATH}"
+            f"Model file not found: {MODEL_PATH}"
         )
 
     return joblib.load(MODEL_PATH)
 
 
-def predict_risk(features: dict) -> dict:
+def predict_risk(features):
     """
     Predict road risk using the trained XGBoost model.
 
     Parameters
     ----------
     features : dict
-        Dictionary containing all 9 required ML features.
+        Dictionary containing all 9 required features.
 
     Returns
     -------
     dict
-        risk_score and risk_level.
+        Risk score and risk level.
     """
 
     validate_features(features)
+
+    model = load_model()
 
     input_data = {
         feature: float(features[feature])
         for feature in FEATURES
     }
 
-    model = load_model()
-
-    input_df = pd.DataFrame(
-        [[input_data[feature] for feature in FEATURES]],
-        columns=FEATURES,
+    dataframe = pd.DataFrame(
+        [input_data],
+        columns=FEATURES
     )
 
-    prediction = float(model.predict(input_df)[0])
+    prediction = model.predict(dataframe)
 
-    # Keep the score within the expected 0-1 range.
-    risk_score = max(0.0, min(1.0, prediction))
+    risk_score = float(prediction[0])
 
-    risk_level = get_risk_level(risk_score)
+    # Keep score within valid range.
+    risk_score = max(0.0, min(1.0, risk_score))
 
     return {
         "risk_score": round(risk_score, 4),
-        "risk_level": risk_level,
+        "risk_level": get_risk_level(risk_score),
     }
 
 
@@ -134,12 +136,9 @@ if __name__ == "__main__":
         "incident_count": 4,
     }
 
-    try:
-        result = predict_risk(sample_features)
+    result = predict_risk(sample_features)
 
-        print("Risk prediction successful.")
-        print(f"Risk Score: {result['risk_score']}")
-        print(f"Risk Level: {result['risk_level']}")
-
-    except Exception as exc:
-        print(f"Risk prediction failed: {exc}")
+    print("Risk Prediction")
+    print("----------------")
+    print(f"Risk Score : {result['risk_score']}")
+    print(f"Risk Level : {result['risk_level']}")
