@@ -1,30 +1,46 @@
-import os
-import sys
+from pathlib import Path
+
 import joblib
 import pandas as pd
 import shap
 
-sys.path.append(
-    os.path.dirname(os.path.abspath(__file__))
+
+FEATURES = [
+    "rainfall",
+    "accumulated_rainfall_24h",
+    "accumulated_rainfall_72h",
+    "rainfall_intensity",
+    "weather_severity_index",
+    "elevation",
+    "slope",
+    "road_importance",
+    "incident_count",
+]
+
+MODEL_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "models"
+    / "risk_model.pkl"
 )
 
-from preprocessing import FEATURES
 
-
-MODEL_PATH = "ml/models/risk_model.pkl"
-
-
-def explain_prediction(data):
-
-    if not os.path.exists(MODEL_PATH):
+def load_model():
+    if not MODEL_PATH.exists():
         raise FileNotFoundError(
-            "Model not found. Run train.py first."
+            f"Model file not found: {MODEL_PATH}"
         )
+
+    return joblib.load(MODEL_PATH)
+
+
+def validate_features(features):
+    if not isinstance(features, dict):
+        raise TypeError("features must be a dictionary")
 
     missing_features = [
         feature
         for feature in FEATURES
-        if feature not in data
+        if feature not in features
     ]
 
     if missing_features:
@@ -32,71 +48,124 @@ def explain_prediction(data):
             f"Missing features: {missing_features}"
         )
 
-    model = joblib.load(MODEL_PATH)
+    try:
+        numeric_features = {
+            feature: float(features[feature])
+            for feature in FEATURES
+        }
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "All feature values must be numeric."
+        ) from exc
+
+    return numeric_features
+
+
+def explain_prediction(features):
+    """
+    Generate SHAP feature contributions for one prediction.
+
+    Returns:
+        Dictionary containing:
+        - prediction
+        - feature_importance
+    """
+
+    numeric_features = validate_features(features)
+
+    model = load_model()
 
     input_data = pd.DataFrame(
-        [[data[feature] for feature in FEATURES]],
+        [
+            [
+                numeric_features[feature]
+                for feature in FEATURES
+            ]
+        ],
         columns=FEATURES,
     )
 
     explainer = shap.TreeExplainer(model)
 
-    shap_values = explainer.shap_values(
-        input_data
-    )
+    shap_values = explainer.shap_values(input_data)
 
-    values = shap_values[0]
+    if hasattr(shap_values, "values"):
+        values = shap_values.values
+    else:
+        values = shap_values
 
-    explanation = []
+    if hasattr(values, "ndim") and values.ndim > 1:
+        values = values[0]
 
-    for feature, value in zip(
-        FEATURES,
-        values,
-    ):
+    values = list(values)
 
-        explanation.append(
-            {
-                "feature": feature,
-                "shap_value": round(
-                    float(value),
-                    4,
-                ),
-                "impact": (
-                    "increases_risk"
-                    if value > 0
-                    else "decreases_risk"
-                ),
-            }
+    prediction = float(model.predict(input_data)[0])
+
+    contributions = {}
+
+    for feature, value in zip(FEATURES, values):
+        contributions[feature] = float(value)
+
+    sorted_contributions = dict(
+        sorted(
+            contributions.items(),
+            key=lambda item: abs(item[1]),
+            reverse=True,
         )
-
-    explanation.sort(
-        key=lambda x: abs(
-            x["shap_value"]
-        ),
-        reverse=True,
     )
 
-    return explanation
+    return {
+        "prediction": prediction,
+        "feature_importance": sorted_contributions,
+    }
 
 
 if __name__ == "__main__":
 
     sample = {
-        "elevation": 1200,
-        "slope": 32,
+        "rainfall": 220,
+        "accumulated_rainfall_24h": 220,
+        "accumulated_rainfall_72h": 220,
+        "rainfall_intensity": 220,
+        "weather_severity_index": 0.82,
+        "elevation": 420,
+        "slope": 25,
         "road_importance": 5,
         "incident_count": 4,
     }
 
-    result = explain_prediction(sample)
+    try:
+        result = explain_prediction(sample)
 
-    print("SHAP Explanation")
-    print("----------------")
+        print("SHAP RISK EXPLANATION")
+        print()
+        print(f"Predicted Risk Score: {result['prediction']:.4f}")
 
-    for item in result:
+        print()
+        print("Feature Contributions:")
+        print("-" * 60)
 
-        print(
-            f"{item['feature']:20s} "
-            f"{item['shap_value']:>8.4f} "
-            f"{item['impact']}"
-        )
+        for feature, contribution in result[
+            "feature_importance"
+        ].items():
+
+            direction = (
+                "increases risk"
+                if contribution > 0
+                else "decreases risk"
+            )
+
+            print(
+                f"{feature:35s} "
+                f"{contribution:+.6f} "
+                f"({direction})"
+            )
+
+        print()
+        print("SHAP explanation completed successfully.")
+
+    except Exception as error:
+        print()
+        print("SHAP explanation failed.")
+        print(f"Error: {error}")
+        raise
