@@ -3,13 +3,38 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.vehicle import Vehicle
-from app.schemas.vehicle import VehicleResponse, VehicleUpdate
+from app.schemas.vehicle import (
+    VehicleCreate,
+    VehicleResponse,
+    VehicleUpdate,
+)
 
 
 router = APIRouter(
     prefix="/vehicles",
     tags=["Vehicles"]
 )
+
+
+@router.post("/", response_model=VehicleResponse)
+def create_vehicle(
+    data: VehicleCreate,
+    db: Session = Depends(get_db)
+):
+    vehicle = Vehicle(
+        vehicle_number=data.vehicle_number,
+        vehicle_type=data.vehicle_type,
+        priority=data.priority,
+        status=data.status,
+        latitude=data.latitude,
+        longitude=data.longitude,
+    )
+
+    db.add(vehicle)
+    db.commit()
+    db.refresh(vehicle)
+
+    return vehicle
 
 
 @router.get("/", response_model=list[VehicleResponse])
