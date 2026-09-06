@@ -1,0 +1,118 @@
+{
+  "scenario_id": "ASSAM_EXTREME_001",
+  "scenario_name": "Critical Landslide Event During Monsoon",
+  "corridor": "Guwahati\u2013Silchar (400 km)",
+  "timestamp": "2026-09-03T18:59:53.594316",
+  "season": "Extreme Monsoon (Jul)",
+  "weather": {
+    "rainfall_mm": 320,
+    "temperature_c": 24,
+    "humidity_percent": 98,
+    "wind_speed_kmh": 55,
+    "condition": "Catastrophic rainfall, extreme conditions",
+    "advisory": "CRITICAL WEATHER ALERT - Cascading landslide risk"
+  },
+  "critical_event": {
+    "event_type": "MAJOR_LANDSLIDE",
+    "location": "NH37 near Karbi Anglong (between Guwahati\u2013Nagaon)",
+    "blocked_road_id": "R3847",
+    "blocked_road_name": "NH37 - Karbi Anglong Section",
+    "impact": "Complete network bifurcation",
+    "duration_estimated": "4\u20138 hours (initial) + recovery"
+  },
+  "cascading_impacts": {
+    "primary_blockage": {
+      "road": "NH37 (R3847)",
+      "impact": "North-South corridor severed",
+      "accessibility_loss": "45%"
+    },
+    "secondary_impacts": {
+      "guwahati_zone": "Accessible via alternative routes (~20 km detour)",
+      "silchar_zone": "Accessible via alternative routes (~50 km detour)",
+      "critical_gap": "No direct NH37 access between zones"
+    },
+    "tertiary_risks": {
+      "description": "Secondary slides likely in adjacent areas",
+      "probability": "HIGH",
+      "additional_closures_expected": "3\u20135 more roads"
+    }
+  },
+  "road_conditions": {
+    "total_roads": 12500,
+    "roads_open": 4750,
+    "roads_blocked": 1,
+    "roads_degraded": 7750,
+    "status": {
+      "OPEN": 4750,
+      "DEGRADED": 7750,
+      "BLOCKED": 1
+    },
+    "critical_blockage": {
+      "road_id": "R3847",
+      "name": "NH37 Karbi Anglong",
+      "length_km": 15,
+      "importance": "CRITICAL"
+    }
+  },
+  "connectivity_analysis": {
+    "network_segments": 2,
+    "segment_1": {
+      "name": "Guwahati Zone",
+      "roads": 5200,
+      "accessibility": "41%"
+    },
+    "segment_2": {
+      "name": "Silchar Zone",
+      "roads": 3100,
+      "accessibility": "24%"
+    },
+    "disconnected_roads": 2500,
+    "critical_note": "Two previously-connected zones now isolated"
+  },
+  "accessibility": {
+    "network_accessibility_percent": 38,
+    "avg_delay_multiplier": 2.8,
+    "note": "Network fragmented; major blockage requires dynamic rerouting",
+    "impact": "Some routes require 50+ km detours"
+  },
+  "vehicles": {
+    "all_operational": false,
+    "vehicles_stranded": "Vehicles in blocked zone unable to cross",
+    "emergency_response": "Emergency vehicles routed via alternative paths",
+    "priority_access": "Only critical medical/emergency vehicles authorized"
+  },
+  "routing_impact": {
+    "shortest_path": "Unavailable (NH37 blocked)",
+    "detour_distance": "+50\u201375 km",
+    "detour_time": "+2\u20133 hours",
+    "alternative_routes": [
+      "Guwahati \u2192 Lumding \u2192 Silchar (via Lumding Junction)",
+      "Guwahati \u2192 Nagaon \u2192 Kaboi \u2192 Silchar (longer, steep)"
+    ]
+  },
+  "risk": {
+    "overall": "CRITICAL",
+    "landslide": "CRITICAL",
+    "flood": "HIGH",
+    "cascading": "HIGH",
+    "emergency_response": "Immediate multi-agency coordination required"
+  },
+  "mitigation_actions": [
+    "Block R3847 from all routing algorithms",
+    "Activate emergency response protocols (NDRF, district admin)",
+    "Deploy rescue teams to NH37 landslide site",
+    "Monitor secondary slide zones (Karbi Anglong, Dima Hasao)",
+    "Divert traffic via alternative routes",
+    "Establish emergency rest stops on detour routes",
+    "Coordinate with medical facilities for rerouting ambulances"
+  ],
+  "recovery_timeline": {
+    "phase_1": "0\u20132 hours: Emergency response deployment",
+    "phase_2": "2\u20136 hours: Debris clearance",
+    "phase_3": "6\u201324 hours: Stabilization + partial clearance",
+    "phase_4": "1\u20133 days: Full restoration if no major damage",
+    "worst_case": "1\u20132 weeks: Road reconstruction (major damage)"
+  },
+  "data_source": "DEMO",
+  "data_note": "SIMULATED for hackathon demo - Based on realistic monsoon scenarios"
+}

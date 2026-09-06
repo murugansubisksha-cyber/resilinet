@@ -1,0 +1,77 @@
+{
+  "scenario_id": "ASSAM_MONSOON_001",
+  "scenario_name": "Heavy Monsoon Rainfall",
+  "corridor": "Guwahati\u2013Silchar (400 km)",
+  "timestamp": "2026-09-03T18:59:53.594298",
+  "season": "Peak Monsoon (Jul-Aug)",
+  "weather": {
+    "rainfall_mm": 230,
+    "temperature_c": 25,
+    "humidity_percent": 92,
+    "wind_speed_kmh": 40,
+    "condition": "Heavy rain, strong wind, poor visibility",
+    "advisory": "Extreme weather alert"
+  },
+  "affected_segments": {
+    "guwahati_nagaon": {
+      "distance_km": 120,
+      "status": "DEGRADED",
+      "reason": "Hill terrain, landslide risk",
+      "affected_roads": "~1200 roads (10%)",
+      "speed_reduction": "35%"
+    },
+    "nagaon_lumding": {
+      "distance_km": 100,
+      "status": "DEGRADED",
+      "reason": "River flooding, waterlogging",
+      "affected_roads": "~800 roads (6%)",
+      "speed_reduction": "40%"
+    },
+    "lumding_silchar": {
+      "distance_km": 180,
+      "status": "OPEN",
+      "reason": "Relatively higher terrain",
+      "affected_roads": "~500 roads (4%)",
+      "speed_reduction": "25%"
+    }
+  },
+  "road_conditions": {
+    "total_roads": 12500,
+    "roads_open": 10000,
+    "roads_blocked": 0,
+    "roads_degraded": 2500,
+    "status": {
+      "OPEN": 10000,
+      "DEGRADED": 2500,
+      "BLOCKED": 0
+    }
+  },
+  "accessibility": {
+    "network_accessibility_percent": 62,
+    "avg_delay_multiplier": 1.35,
+    "note": "Major routes open, hill/flood-prone routes degraded",
+    "bottlenecks": [
+      "Guwahati\u2013Nagaon transition",
+      "River crossings near Lumding"
+    ]
+  },
+  "vehicles": {
+    "all_operational": true,
+    "speed_reduction_percent": 30,
+    "priority_routing": "Medical + Emergency vehicles prioritized",
+    "restrictions": "Avoid degraded hill routes where possible"
+  },
+  "risk": {
+    "overall": "HIGH",
+    "landslide": "MEDIUM",
+    "flood": "HIGH",
+    "cascading_risk": "Secondary landslides possible in steep terrain"
+  },
+  "critical_routes": [
+    "NH37 Guwahati\u2013Nagaon (landslide-prone)",
+    "NH6 bridge crossings (flood-prone)",
+    "Silchar approach roads"
+  ],
+  "data_source": "DEMO",
+  "data_note": "SIMULATED for hackathon demo"
+}
