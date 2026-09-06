@@ -1,50 +1,41 @@
-# ResiliNet ML Engine
+# ResiliNet ML - Road Risk Prediction
 
-## Person 4 - Road Risk Prediction
+## Overview
 
-This module predicts road hazard risk using machine learning and provides explainable risk predictions.
+The ResiliNet ML module predicts road risk using weather, terrain, road importance, and historical incident data.
 
-## Technologies
+The machine learning pipeline uses **XGBoost Regressor** for risk-score prediction and **SHAP** for model explainability.
 
-- Python
-- Pandas
-- NumPy
-- Scikit-learn
-- XGBoost
-- SHAP
-- Joblib
+The model produces a continuous **risk score between 0 and 1**, which is converted into four risk levels:
 
-## Features
+- LOW
+- MEDIUM
+- HIGH
+- CRITICAL
 
-The model uses the following features:
+## ML Model
 
-- Rainfall
-- Accumulated rainfall
-- Elevation
-- Slope
-- Road importance
-- Historical incidents
-- Field evidence
+- Algorithm: XGBoost Regressor
+- Target: `risk_score`
+- Output range: `0.0 - 1.0`
+- Explainability: SHAP
+- Model file: `ml/models/risk_model.pkl`
 
-## Risk Levels
-
-| Score | Level |
-|---|---|
-| 0.00 - 0.24 | LOW |
-| 0.25 - 0.49 | MEDIUM |
-| 0.50 - 0.74 | HIGH |
-| 0.75 - 1.00 | CRITICAL |
-
-## Files
-
-- `preprocessing.py` - Loads, validates, and preprocesses the dataset
-- `train.py` - Trains the XGBoost risk prediction model
-- `predict.py` - Generates risk scores and risk levels
-- `explain.py` - Generates SHAP-based feature explanations
-
-## Dataset
-
-The training dataset should be placed at:
+## Project Structure
 
 ```text
-data/road_risk.csv
+ml/
+├── data/
+├── notebooks/
+├── models/
+│   └── risk_model.pkl
+├── src/
+│   ├── preprocessing.py
+│   ├── features.py
+│   ├── train.py
+│   ├── predict.py
+│   ├── explain.py
+│   ├── risk_service.py
+│   ├── test_dynamic_risk.py
+│   └── test_risk_service.py
+└── README.md
