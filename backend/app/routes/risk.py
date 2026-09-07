@@ -1,6 +1,3 @@
-import os
-import sys
-
 from fastapi import APIRouter, HTTPException
 
 from app.schemas.risk import (
@@ -20,42 +17,35 @@ road_risk_router = APIRouter(
 )
 
 
-# Add the ML source directory to Python's path.
-BASE_DIR = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        "..",
-        "..",
-    )
-)
-
-ML_SRC = os.path.join(
-    BASE_DIR,
-    "ml",
-    "src",
-)
-
-if ML_SRC not in sys.path:
-    sys.path.insert(0, ML_SRC)
-
-
 try:
-    from predict import predict_risk
+    from ml.src.risk_service import predict_risk
 
     ML_AVAILABLE = True
 
-except Exception:
+except Exception as error:
+
+    print(
+        f"ML service import failed: {error}"
+    )
+
     predict_risk = None
     ML_AVAILABLE = False
 
 
-def get_risk_level(risk_score: float) -> str:
-    """Convert risk score into ResiliNet risk level."""
+def get_risk_level(
+    risk_score: float
+) -> str:
+
+    """
+    Convert risk score into ResiliNet risk level.
+    """
 
     risk_score = max(
         0.0,
-        min(1.0, float(risk_score))
+        min(
+            1.0,
+            float(risk_score)
+        )
     )
 
     if risk_score <= 0.24:
@@ -71,33 +61,61 @@ def get_risk_level(risk_score: float) -> str:
         return "CRITICAL"
 
 
-def rule_based_fallback(data: RiskPredictRequest):
+def rule_based_fallback(
+    data: RiskPredictRequest
+):
+
+    """
+    Rule-based fallback used only when
+    the ML service is unavailable.
+    """
 
     risk_score = 0.0
 
-    if data.slope >= 25:
-        risk_score += 0.35
-
-    elif data.slope >= 15:
-        risk_score += 0.20
-
-    if data.elevation >= 430:
-        risk_score += 0.20
-
-    elif data.elevation >= 400:
-        risk_score += 0.10
-
-    if data.incident_count >= 5:
+    if data.weather_severity_index >= 0.80:
         risk_score += 0.30
 
-    elif data.incident_count >= 3:
+    elif data.weather_severity_index >= 0.60:
         risk_score += 0.20
 
+    elif data.weather_severity_index >= 0.30:
+        risk_score += 0.10
+
+    if data.rainfall >= 250:
+        risk_score += 0.20
+
+    elif data.rainfall >= 150:
+        risk_score += 0.12
+
+    elif data.rainfall >= 50:
+        risk_score += 0.05
+
+    if data.slope >= 25:
+        risk_score += 0.20
+
+    elif data.slope >= 15:
+        risk_score += 0.12
+
+    if data.elevation >= 430:
+        risk_score += 0.10
+
+    elif data.elevation >= 400:
+        risk_score += 0.05
+
+    if data.incident_count >= 5:
+        risk_score += 0.20
+
+    elif data.incident_count >= 3:
+        risk_score += 0.12
+
+    elif data.incident_count >= 1:
+        risk_score += 0.05
+
     if data.road_importance >= 5:
-        risk_score += 0.15
+        risk_score += 0.10
 
     elif data.road_importance >= 4:
-        risk_score += 0.10
+        risk_score += 0.05
 
     risk_score = min(
         1.0,
@@ -105,6 +123,26 @@ def rule_based_fallback(data: RiskPredictRequest):
     )
 
     factors = {
+        "rainfall": (
+            "CRITICAL"
+            if data.rainfall >= 250
+            else "HIGH"
+            if data.rainfall >= 150
+            else "MEDIUM"
+            if data.rainfall >= 50
+            else "LOW"
+        ),
+
+        "weather_severity": (
+            "CRITICAL"
+            if data.weather_severity_index >= 0.80
+            else "HIGH"
+            if data.weather_severity_index >= 0.60
+            else "MEDIUM"
+            if data.weather_severity_index >= 0.30
+            else "LOW"
+        ),
+
         "slope": (
             "CRITICAL"
             if data.slope >= 27
@@ -114,6 +152,7 @@ def rule_based_fallback(data: RiskPredictRequest):
             if data.slope >= 10
             else "LOW"
         ),
+
         "road_importance": (
             "CRITICAL"
             if data.road_importance >= 5
@@ -123,6 +162,7 @@ def rule_based_fallback(data: RiskPredictRequest):
             if data.road_importance >= 2
             else "LOW"
         ),
+
         "elevation": (
             "CRITICAL"
             if data.elevation >= 440
@@ -132,6 +172,7 @@ def rule_based_fallback(data: RiskPredictRequest):
             if data.elevation >= 375
             else "LOW"
         ),
+
         "historical_incidents": (
             "CRITICAL"
             if data.incident_count >= 5
@@ -165,29 +206,83 @@ def predict_risk_endpoint(
     data: RiskPredictRequest
 ):
 
-    if not ML_AVAILABLE:
-        fallback = rule_based_fallback(data)
+    """
+    Predict road risk using the trained XGBoost model.
+    """
 
-        return fallback
+    if not ML_AVAILABLE:
+
+        print(
+            "ML service is unavailable."
+        )
+
+        print(
+            "Using rule-based fallback."
+        )
+
+        return rule_based_fallback(
+            data
+        )
+
+    ml_input = {
+        "rainfall": data.rainfall,
+
+        "accumulated_rainfall_24h":
+            data.accumulated_rainfall_24h,
+
+        "accumulated_rainfall_72h":
+            data.accumulated_rainfall_72h,
+
+        "rainfall_intensity":
+            data.rainfall_intensity,
+
+        "weather_severity_index":
+            data.weather_severity_index,
+
+        "elevation":
+            data.elevation,
+
+        "slope":
+            data.slope,
+
+        "road_importance":
+            data.road_importance,
+
+        "incident_count":
+            data.incident_count,
+    }
 
     try:
 
-        ml_input = {
-            "elevation": data.elevation,
-            "slope": data.slope,
-            "road_importance": data.road_importance,
-            "incident_count": data.incident_count,
-        }
+        print(
+            "Calling ML risk service..."
+        )
+
+        print(
+            f"ML input: {ml_input}"
+        )
 
         result = predict_risk(
             ml_input
+        )
+
+        print(
+            f"ML result: {result}"
+        )
+
+        print(
+            "ML prediction successful."
         )
 
         return {
             "road_id": data.road_id,
             "risk_score": result["risk_score"],
             "risk_level": result["risk_level"],
-            "factors": result["factors"],
+            "factors": result.get(
+                "factors",
+                {}
+            ),
+            "source": "XGBOOST",
         }
 
     except Exception as error:
@@ -196,9 +291,13 @@ def predict_risk_endpoint(
             f"ML prediction failed: {error}"
         )
 
-        fallback = rule_based_fallback(data)
+        print(
+            "Using rule-based fallback."
+        )
 
-        return fallback
+        return rule_based_fallback(
+            data
+        )
 
 
 @road_risk_router.get(
@@ -221,6 +320,7 @@ def get_road_risk(
         "risk_level": "LOW",
         "message": (
             "Road risk requires "
-            "feature data for ML prediction."
+            "feature data for ML prediction. "
+            "Use POST /risk/predict."
         )
     }
